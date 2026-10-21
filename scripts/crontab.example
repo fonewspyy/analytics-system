@@ -1,0 +1,7 @@
+# Install with: crontab -e   (adjust the path to where the repo lives)
+# m   h  dom mon dow  command
+0     2  *   *   *    /opt/analytics-system/scripts/backup.sh               >/dev/null 2>&1
+*/5   *  *   *   *    /opt/analytics-system/scripts/healthcheck.sh --heal   >/dev/null 2>&1
+*/15  *  *   *   *    /opt/analytics-system/scripts/monitor.sh              >/dev/null 2>&1
+0     *  *   *   *    /opt/analytics-system/scripts/log-rotate.sh           >/dev/null 2>&1
+# Each script also appends to logs/<script>.log, which log-rotate.sh keeps bounded.

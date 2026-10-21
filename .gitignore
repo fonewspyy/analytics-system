@@ -1,0 +1,17 @@
+/.claude
+/CLAUDE.md
+
+# .NET
+bin/
+obj/
+*.user
+.vs/
+TestResults/
+
+# secrets / local
+.env
+
+# runtime output
+/backups/
+/logs/
+*.log

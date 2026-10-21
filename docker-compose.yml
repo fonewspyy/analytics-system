@@ -1,0 +1,62 @@
+# One-command setup:  docker compose up -d --build
+# Values come from .env when present; the defaults below make a clean clone work without it.
+
+x-logging: &default-logging
+  # Docker rotates container logs itself: at most 3 × 10 MB per service.
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-analytics}
+      POSTGRES_USER: ${POSTGRES_USER:-analytics}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      TZ: Asia/Bangkok
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Runs once, on an empty volume (ADR-0003).
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - backend
+    # No published port: only the API can reach the database.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
+    logging: *default-logging
+
+  api:
+    build:
+      context: .
+      dockerfile: src/Analytics.Api/Dockerfile
+    image: analytics-api:latest
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Default: >-
+        Host=db;Port=5432;Database=${POSTGRES_DB:-analytics};Username=${POSTGRES_USER:-analytics};Password=${POSTGRES_PASSWORD:-change-me}
+    ports:
+      - "${API_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - backend
+      - frontend
+    logging: *default-logging
+
+networks:
+  # internal: containers on it have no route out of the host.
+  backend:
+    internal: true
+  frontend:
+
+volumes:
+  pgdata:

@@ -1,0 +1,12 @@
+**/bin/
+**/obj/
+**/.vs/
+**/*.user
+.git/
+.claude/
+.env
+backups/
+logs/
+docs/
+postman/
+tests/
