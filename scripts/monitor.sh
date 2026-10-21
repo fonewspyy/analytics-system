@@ -38,6 +38,7 @@ snapshot() {
         db_size="$(compose exec -T db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Atc \
             "SELECT pg_size_pretty(pg_database_size(current_database()))")"
         printf '\ndatabase %-16s %s\n' "$POSTGRES_DB" "$db_size"
+        printf 'backups volume          %s\n' "$(in_db 'du -sh /backups | cut -f1')"
     fi
 
     disk="$(df -P "$ROOT_DIR" | awk 'NR == 2 { sub("%", "", $5); print $5 }')"
@@ -45,9 +46,6 @@ snapshot() {
     if above "$disk" "$DISK_WARN"; then
         log WARN "host disk ${disk}% > ${DISK_WARN}%"
         breach=1
-    fi
-    if [[ -d "$ROOT_DIR/backups" ]]; then
-        printf 'backups dir             %s\n' "$(du -sh "$ROOT_DIR/backups" | cut -f1)"
     fi
 
     log INFO "snapshot taken (threshold breach: $breach)"

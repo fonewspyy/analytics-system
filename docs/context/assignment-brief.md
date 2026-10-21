@@ -1,8 +1,9 @@
 # Assignment brief — Containerized Business Analytics System
 
 > Source: `Containerized Business Analytics System_C_.pdf` (received 2026-10-21).
-> The PDF's Thai text does not survive text extraction; this is the structure as read,
-> with Thai wording reconstructed. Check against the original PDF before quoting it.
+> §3 Day 3, §4 and §5 are quoted in the original Thai (from a copy of the brief), each with an
+> English summary. §1, §2 and Day 1–2 are summarised from the PDF's structure: its Thai text
+> does not survive text extraction, so check the PDF before quoting those parts.
 
 ## 1. Project goal
 
@@ -29,34 +30,52 @@ Build a Backend API for **Project Monitoring**.
 * Complex query: an analytics endpoint using advanced SQL (JOIN, aggregate functions).
 * Data export: return results as JSON **and** CSV through the API.
 
-### Day 3 — Linux operations & security
-* Bash automation around the containers:
-  * database backup with `pg_dump` (to a volume / host path)
-  * container health check
-* System admin:
-  * resource usage (CPU / memory) per container
-  * log rotation so logs do not fill the disk
+### Day 3 — Linux Operations & Security
 
-## 4. Deliverables
+> * **Linux Automation:** เขียน **Bash Script** สั่งงานจากภายในหรือภายนอก Container เพื่อ:
+>   * ทำ **Database Backup (pg_dump)** และบีบอัดไฟล์เก็บไว้ใน Volume ที่กำหนด
+>   * ตรวจสอบสถานะของ Container (Health Check)
+> * **System Admin Task:** เขียนคำสั่งเช็ค **Resource Usage** (CPU/Memory) ของ Container ที่รันอยู่
+>   * จำลองการจัดการ **Logs** (Log Rotation) เพื่อไม่ให้ไฟล์ Log ขนาดใหญ่เกินไปจนกระทั่ง Disk เต็ม
 
-1. GitHub repository with the source code
-2. Docker setup — `docker-compose.yml` that brings everything up in **one command**
-3. Bash scripts (`.sh`) for backup and monitoring
-4. API documentation — `README.md` and a Postman collection
+Summary: Bash scripts, run from inside or outside the container, that
+* take a `pg_dump` backup, **compress** it, and keep it in a **designated volume** (R13, ADR-0007);
+* check container health (R14);
+* show CPU / memory use of the running containers (R15);
+* rotate logs so they cannot fill the disk (R16).
 
-## 5. Evaluation (4 × 25%)
+## 4. Deliverables (ข้อกำหนดที่ต้องส่ง)
 
-| Criterion | Weight | What it looks at |
-| --- | --- | --- |
-| Database schema | 25% | Relations, use of PostgreSQL features |
-| Container quality | 25% | Dockerfile, volumes, network |
-| Backend logic | 25% | Code structure, error handling |
-| Linux/Unix skill | 25% | Scripting, infrastructure management |
+> 1. **GitHub Repository:** ที่มี Source Code ครบถ้วน
+> 2. **Docker Setup:** ไฟล์ docker-compose.yml ที่สั่งรันแล้วระบบพร้อมใช้งานทันที (One-command setup)
+> 3. **Bash Scripts:** ไฟล์ .sh สำหรับงาน Backup และ Monitoring ตามที่ระบุ
+> 4. **API Document:** อาจจะเป็นไฟล์ README.md หรือ Postman Collection
 
-Submission: a link to the Git repository (with a README explaining how to run it).
+Summary: the full source on GitHub; a compose file that works in one command; `.sh`
+scripts for backup and monitoring; API docs as a README **or** a Postman collection
+(this repo has both).
+
+## 5. Evaluation (เกณฑ์การประเมิน)
+
+> * **Database Schema (25%):** ความถูกต้องของการออกแบบ Relation และการใช้ PostgreSQL Features
+> * **Container Quality (25%):** ความเข้าใจในการจัดการ Docker, Volumes และ Network
+> * **Backend Logic (25%):** คุณภาพของโค้ด Node.js และการจัดการ Error Handling
+> * **Linux/Unix Skill (25%):** ความสามารถในการใช้ Scripting และคำสั่งระบบเพื่อควบคุม Infrastructure
+>
+> *ส่งเป็น Link Git Repository (ที่มีไฟล์ README อธิบายการติดตั้ง)*
+
+| Criterion | Weight | What it looks at | Where to look in this repo |
+| --- | --- | --- | --- |
+| Database schema | 25% | Correct relations, use of PostgreSQL features | `db/init/`, README § Database |
+| Container quality | 25% | Handling of Docker, volumes and network | `docker-compose.yml`, `src/Analytics.Api/Dockerfile`, README § Containers |
+| Backend logic | 25% | Code quality (the brief says Node.js — see below) and error handling | `src/`, `Api/Errors/GlobalExceptionHandler.cs` |
+| Linux/Unix skill | 25% | Scripting and system commands to control the infrastructure | `scripts/`, README § Operations scripts |
+
+Submission: a link to the Git repository, with a README that explains installation.
 
 ## Inconsistency in the brief
 
-The stack says **.NET**, but Day 1 ("Dockerfile for the Node.js API") and the
-Backend-logic criterion mention **Node.js**. Treated as a template leftover —
+The Technical Stack section says **.NET ≥ 8 (Clean Architecture)**, but Day 1
+("Dockerfile for the Node.js API") and the Backend Logic criterion (คุณภาพของโค้ด Node.js)
+mention **Node.js**. This implementation follows the Technical Stack section —
 see `open-questions.md` Q1 and ADR-0002.

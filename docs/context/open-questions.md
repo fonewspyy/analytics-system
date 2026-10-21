@@ -16,4 +16,4 @@ until someone answers it. Close a question by moving it to **Resolved** with the
 | --- | --- | --- |
 | Q3 | What does "complex query" need to answer? | Three reports: per-project progress, per-user workload, daily trend (R09). |
 | Q4 | Where does `system_logs` come from? | Written by the API in the same statement as each change, plus `request.failed` for 500s (ADR-0006). |
-| Q5 | Backup destination and retention? | `./backups/` on the host, newest 7 kept (`BACKUP_KEEP`), SHA-256 per dump (R13). |
+| Q5 | Backup destination and retention? | Named volume `pgbackups`, compressed custom-format dumps, newest 7 kept (`BACKUP_KEEP`), SHA-256 per dump; `--export` for off-host copies (ADR-0007). The brief's Thai text asks for a designated volume. |

@@ -17,12 +17,13 @@ CODE=""
 # call METHOD PATH [JSON] -> sets CODE and BODY
 call() {
     local method=$1 path=$2 data=${3:-}
-    local args=(-s -o /tmp/smoke_body.$$ -w '%{http_code}' -X "$method" "$BASE$path")
+    local args=(-s -w '\n%{http_code}' -X "$method" "$BASE$path") out
     [[ -n "$data" ]] && args+=(-H 'Content-Type: application/json' -d "$data")
-    CODE="$(curl "${args[@]}")"
-    BODY="$(cat /tmp/smoke_body.$$)"
+    # Body and status in one capture: the status code is the last line.
+    out="$(curl "${args[@]}")"
+    CODE="${out##*$'\n'}"
+    BODY="${out%$'\n'*}"
 }
-trap 'rm -f /tmp/smoke_body.$$' EXIT
 
 check() {
     local name=$1 expected=$2 needle=${3:-}

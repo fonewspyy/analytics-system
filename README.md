@@ -167,7 +167,8 @@ Index use, checked with `EXPLAIN` on 200,000 tasks and 200,000 log rows (inserte
 | `api` | multi-stage: `sdk:10.0-alpine` → `aspnet:10.0-alpine`, runs as `app` (uid 1654) | `backend`, `frontend` | 8080 | `GET /health` |
 
 * `api` starts only after `db` is healthy (`depends_on: condition: service_healthy`).
-* Data lives in the named volume `pgdata`; backups go to `./backups` on the host.
+* Two named volumes: `pgdata` for the database, `pgbackups` (mounted at `/backups` in `db`) for compressed dumps.
+  `docker compose down -v` removes both — export backups first (`backup.sh --export DIR`).
 * The Dockerfile restores from `.csproj` files first, so the package layer is cached across code changes.
 * Container logs rotate at 3 × 10 MB per service (`json-file` driver).
 
@@ -175,10 +176,10 @@ Index use, checked with `EXPLAIN` on 200,000 tasks and 200,000 log rows (inserte
 
 | Script | What it does | Exit code |
 | --- | --- | --- |
-| `scripts/backup.sh` | `pg_dump -Fc`, verified with `pg_restore --list`, SHA-256 alongside, owner-only permissions, keeps the newest `BACKUP_KEEP` (7) | 1 on failure |
-| `scripts/restore.sh <file> --yes` | Checks the SHA-256, stops `api`, restores in one transaction, starts `api` | 1 on failure |
+| `scripts/backup.sh [--export DIR \| --list]` | `pg_dump` in custom format, **compressed** (zlib level 6), into the **`pgbackups` volume**; verified with `pg_restore --list`, SHA-256 alongside, owner-only permissions, keeps the newest `BACKUP_KEEP` (7). Named by the container clock in UTC so the order holds whichever host runs it ([ADR-0007](docs/adr/0007-backups-in-a-named-volume.md)). `--export` copies the backup to a host folder | 1 on failure |
+| `scripts/restore.sh <name \| file> --yes` | Takes a backup name from the volume or a dump file from the host; checks the SHA-256, stops `api`, restores in one transaction, starts `api` and waits until it is healthy | 1 on failure |
 | `scripts/healthcheck.sh [--heal]` | Each service: state, Docker health, restart count; then `/health`. `--heal` restarts unhealthy services | 1 if anything is unhealthy |
-| `scripts/monitor.sh [--watch N]` | CPU / memory / network / PIDs per container, database size, host disk, backups size; thresholds `CPU_WARN`, `MEM_WARN`, `DISK_WARN` | 1 on a breach |
+| `scripts/monitor.sh [--watch N]` | CPU / memory / network / PIDs per container, database size, backups volume size, host disk; thresholds `CPU_WARN`, `MEM_WARN`, `DISK_WARN` | 1 on a breach |
 | `scripts/log-rotate.sh` | Rotates `logs/*.log` over `LOG_MAX_KB` (1024) to `.1.gz … .N.gz`, keeps `LOG_KEEP` (5); reports Docker's log limits | |
 | `scripts/smoke-test.sh` | 33 end-to-end checks: CRUD, every business rule, errors, analytics, CSV, audit | 1 if any fails |
 

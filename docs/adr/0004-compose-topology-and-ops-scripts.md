@@ -1,6 +1,6 @@
 # ADR-0004: Compose topology, volumes and ops scripts
 
-* Status: accepted
+* Status: accepted (backup location superseded by ADR-0007)
 * Date: 2026-10-21
 * Requirements: R05–R07, R13–R16
 

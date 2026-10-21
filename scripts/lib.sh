@@ -21,7 +21,16 @@ LOG_DIR="${LOG_DIR:-$ROOT_DIR/logs}"
 mkdir -p "$LOG_DIR"
 LOG_FILE="${LOG_FILE:-$LOG_DIR/$(basename "$0" .sh).log}"
 
-compose() { docker compose "$@"; }
+# MSYS_NO_PATHCONV: Git Bash on Windows would rewrite container paths such as /backups
+# into C:/Program Files/Git/backups. Scoped to docker compose only; Linux ignores it.
+compose() { MSYS_NO_PATHCONV=1 docker compose "$@"; }
+
+# Run a POSIX sh script inside the db container; extra arguments become $1, $2, ...
+in_db() {
+    local script=$1
+    shift
+    compose exec -T db sh -c "$script" sh "$@"
+}
 
 log() {
     local level=$1

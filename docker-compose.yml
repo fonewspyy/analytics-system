@@ -19,6 +19,10 @@ services:
       TZ: Asia/Bangkok
     volumes:
       - pgdata:/var/lib/postgresql/data
+      # Compressed pg_dump files written by scripts/backup.sh (ADR-0007).
+      # Separate from pgdata, so the backups outlive a lost or recreated data volume.
+      # `docker compose down -v` removes both; export first (backup.sh --export DIR).
+      - pgbackups:/backups
       # Runs once, on an empty volume (ADR-0003).
       - ./db/init:/docker-entrypoint-initdb.d:ro
     networks:
@@ -60,3 +64,4 @@ networks:
 
 volumes:
   pgdata:
+  pgbackups:

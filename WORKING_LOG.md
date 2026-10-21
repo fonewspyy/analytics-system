@@ -25,3 +25,7 @@ Next: Day 3 ops scripts.
 2026-10-21 20:51 | day3 | backup/restore/healthcheck/monitor/log-rotate/smoke-test scripts + crontab example; 46 unit tests; README rewritten as the API + ops document; requirements R01–R18 done.
 Evidence: restore round-trip 351 → 401 rows; retention by name; shellcheck 0 findings; all scripts run in Alpine (docker:cli) incl. smoke 33/33, dumps 0600; fresh `down -v && up -d --build` → smoke 33/33, healthcheck exit 0; dotnet build 0 warnings, dotnet test 46/46.
 Next: owner review + commit; open questions Q1 (.NET vs Node.js) and Q2 (auth) stay as stated assumptions in the README.
+
+2026-10-21 21:10 | day3 | Backups moved into named volume `pgbackups` (compressed custom-format pg_dump, verified, SHA-256, retention) with `--list` / `--export DIR`; restore takes a volume name or a host file and waits for the API to be healthy; backup names come from the container clock in UTC (ADR-0007). Assignment brief now quotes the Thai text of Day 3, deliverables and criteria.
+Evidence: restore by name and from exported file → 401 rows; tampered dump → checksum mismatch exit 1; failed pg_dump leaves no file; backups from Windows and a Linux container sort in creation order; shellcheck 0 findings; fresh `down -v && up` → smoke 33/33 on Git Bash and in a Linux container. (MSYS_NO_PATHCONV is scoped to `docker compose` only: set globally it broke curl's temp-file path on Git Bash; smoke-test no longer uses a temp file.)
+Next: owner commits and pushes; ask the interviewer about .NET vs Node.js (Q1).

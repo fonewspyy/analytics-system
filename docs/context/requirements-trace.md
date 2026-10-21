@@ -17,7 +17,7 @@ Status: `todo` · `doing` · `done` · `blocked`.
 | R10 | Export JSON + CSV (§3 D2) | `Api/Formatting/CsvOutputFormatter.cs`, `Infrastructure/Export/CsvWriter.cs` | done | `?format=csv` and `Accept: text/csv`; unit tests for quoting + CSV injection |
 | R11 | Centralised error handling (§5) | `Api/Errors/GlobalExceptionHandler.cs` | done | 400/404/409/500 ProblemDetails; db stopped → generic 500, `/health` 503 |
 | R12 | Clean Architecture layering (§2, §5) | `src/*` | done | one-way project references; domain has no package references |
-| R13 | `pg_dump` backup script (§3 D3) | `scripts/backup.sh`, `scripts/restore.sh` | done | delete 50 tasks → restore → 401 rows back; retention; files 0600 on Linux |
+| R13 | `pg_dump` backup, compressed, kept in a designated volume (§3 D3) | `scripts/backup.sh`, `scripts/restore.sh`, volume `pgbackups` | done | dump compressed into `pgbackups:/backups`, files 0600; delete 30 tasks → restore by name / from exported host file → 401 rows; tampered dump → checksum mismatch, exit 1; failed pg_dump leaves no file; backups from Windows and Linux hosts sort correctly (ADR-0007) |
 | R14 | Container health check script (§3 D3) | `scripts/healthcheck.sh` | done | db stopped → exit 1 with reason; `--heal` restarts |
 | R15 | CPU/memory monitoring script (§3 D3) | `scripts/monitor.sh` | done | snapshot + thresholds; `CPU_WARN=0` → WARN lines, exit 1 |
 | R16 | Log rotation (§3 D3) | compose `x-logging` + `scripts/log-rotate.sh` | done | `LOG_MAX_KB=0 LOG_KEEP=2` → `.1.gz`/`.2.gz`, older dropped |
